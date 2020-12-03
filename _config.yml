@@ -107,7 +107,7 @@ search:
   limit: 10000
 
 excerpt:
-  depth: 5
+  depth: 1
   excerpt_excludes: []
   more_excludes: []
   hideWholePostExcerpts: true
