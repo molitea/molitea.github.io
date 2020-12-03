@@ -3,11 +3,11 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: MOLI-TEA
 subtitle: ''
-description: ''
+description: '札记'
 keywords:
-author: John Doe
+author: MOLI TEA
 language: zh-CN
 timezone: ''
 
@@ -105,7 +105,13 @@ search:
   field: post
   format: html
   limit: 10000
-  
+
+excerpt:
+  depth: 5
+  excerpt_excludes: []
+  more_excludes: []
+  hideWholePostExcerpts: true
+
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
