@@ -1,6 +1,6 @@
 ---
 title: git 常用命令
-tags: git
+tags: Git
 ---
 
 常用git命令归纳：

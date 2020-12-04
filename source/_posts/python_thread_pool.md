@@ -1,6 +1,6 @@
 ---
 title: Python 线程池
-tags: python, threadpool
+tags: [Python, threadpool, futures]
 ---
 
 **什么是线程池**
