@@ -5,7 +5,7 @@ tags: python, threadpool
 
 **什么是线程池**
 
-Web服务器、数据库服务器、文件服务器、邮件服务器等许多服务器应用都面向处理来自某些远程来源的**大量短小**的任务。构建服务器应用程序的一个过于简单的模型是：每当一个请求到达就创建一个新的服务对象，然后在新的服务对象中为请求服务。但当有大量请求并发访问时，服务器不断的创建和销毁对象的开销很大。所以提高服务器效率的一个手段就是尽可能减少创建和销毁对象的次数，特别是一些很耗资源的对象创建和销毁，这样就引入了“池”的概念，“池”的概念使得人们可以定制一定量的资源，然后对这些资源进行复用，而不是频繁的创建和销毁。
+Web服务器、数据库服务器、文件服务器、邮件服务器等许多服务器应用都面向处理来自某些远程来源的**大量短小的任务**。构建服务器应用程序的一个过于简单的模型是：每当一个请求到达就创建一个新的服务对象，然后在新的服务对象中为请求服务。但当有大量请求并发访问时，服务器不断的创建和销毁对象的开销很大。所以提高服务器效率的一个手段就是尽可能减少创建和销毁对象的次数，特别是一些很耗资源的对象创建和销毁，这样就引入了“池”的概念，“池”的概念使得人们可以定制一定量的资源，然后对这些资源进行复用，而不是频繁的创建和销毁。
 
 线程池是预先创建线程的一种技术。线程池在还没有任务到来之前，创建一定数量的线程，放入空闲队列中。这些线程都是处于睡眠状态，即均为启动，不消耗CPU，而只是占用较小的内存空间。当请求到来之后，缓冲池给这次请求分配一个空闲线程，把请求传入此线程中运行，进行处理。当预先创建的线程都处于运行状态，即预制线程不够，线程池可以自由创建一定数量的新线程，用于处理更多的请求。当系统比较闲的时候，也可以通过移除一部分一直处于停用状态的线程。
 
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     print "Stop & End."
 ```
 
-threadpool是一个比较老的模块了，现在虽然还有一些人在用，但已经不再是主流了，关于python多线程，现在已经开始步入未来（futures模块）了
+threadpool是一个比较老的模块了，现在虽然还有一些人在用，但已经不再是主流了，关于python多线程，现在已经开始步入未来（futures模块）了。
 
 **第二种：futures（新配方）**
 
@@ -167,9 +167,40 @@ concurrent.futures中的常用方法：
 wait(fs, timeout=None, return_when=ALL_COMPLETED)
 ```
 
-fs: 表示需要执行的序列
-timeout: 等待的最大时间，如果超过这个时间即使线程未执行完成也将返回
-return_when：表示wait返回结果的条件，默认为 ALL_COMPLETED 全部执行完成再返回；可指定FIRST_COMPLETED 当第一个执行完就退出阻塞
+fs: 表示需要执行的序列；
+timeout: 等待的最大时间，如果超过这个时间即使线程未执行完成也将返回；
+return_when：表示wait返回结果的条件，默认为 ALL_COMPLETED 全部执行完成再返回；可指定FIRST_COMPLETED 当第一个执行完就退出阻塞。
+
+```python
+from  concurrent.futures import ThreadPoolExecutor,wait,FIRST_COMPLETED, ALL_COMPLETED
+import time
+
+task_args_list = [('zhangsan', 1),('lishi',2), ('wangwu', 3)]
+task_list = []
+
+
+def task(name, seconds):
+    print('% sleep %s seconds start...' % (name, seconds))
+    time.sleep(seconds)
+    print('% sleep %s seconds done' % (name, seconds))
+    return '%s task done' % name
+
+with ThreadPoolExecutor(max_workers=5) as t:
+    [task_list.append(t.submit(task, *arg)) for  arg in task_args_list]
+    wait(task_list, return_when=FIRST_COMPLETED)
+    print('all_task_submit_complete! and First task complete!')
+    print(wait(task_list,timeout=1.5))
+    
+# 运行结果
+zhangsanleep 1 seconds start...
+lishileep 2 seconds start...
+wangwuleep 3 seconds start...
+zhangsanleep 1 seconds done
+all_task_submit_complete! and First task complete!
+lishileep 2 seconds done
+DoneAndNotDoneFutures(done=set([<Future at 0x33b8708 state=finished returned str>, <Future at 0x33b8d08 state=finished returned str>]), not_done=set([<Future at 0x33be288 state=running>]))
+wangwuleep 3 seconds done
+```
 
 **as_completed**
 
