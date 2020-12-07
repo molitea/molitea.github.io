@@ -3,9 +3,9 @@ title: C++11常用特性
 tags: [C++, C++11]
 ---
 
-## 1、关键字及新语法
+## 关键字及新语法
 
-### 1.1 auto关键字及用法
+### auto关键字及用法
 
 **A、auto关键字能做什么？**
 
@@ -57,7 +57,7 @@ public:
 };
 ```
 
-### 1.2 nullptr关键字及用法
+### nullptr关键字及用法
 
 为什么需要nullptr? NULL有什么毛病？
 
@@ -92,7 +92,7 @@ TestWork 2
 
 NULL在c++里表示空指针，看到问题了吧，我们调用test.TestWork(NULL)，其实期望是调用的是void TestWork(int * index)，但结果调用了void TestWork(int index)。但使用nullptr的时候，我们能调用到正确的函数。
 
-### 1.3 for循环语法
+### for循环语法
 
 OK，直接以简单示例看看用法吧。
 
@@ -110,11 +110,11 @@ int main()
 
 以上用法不仅仅局限于数据，STL容器都同样适用。
 
-## 2、STL容器
+## STL容器
 
 总结C++11新增的一些容器，以及对其实现做一些简单的解释。
 
-### 2.1 std::array
+### std::array
 
 std::array跟数组并没有太大区别，std::array相对于数组，增加了迭代器等函数（接口定义可参考C++官方文档）。
 
@@ -134,7 +134,7 @@ int main()
 }
 ```
 
-### 2.2 std::forward_list
+### std::forward_list
 
 std::forward_list为C++新增的线性表，与list区别在于它是单向链表。我们在学习数据结构的时候都知道，链表在对数据进行插入和删除是比顺序存储的线性表有优势，因此在插入和删除操作频繁的应用场景中，使用list和forward_list比使用array、vector和deque效率要高很多。
 
@@ -158,7 +158,7 @@ int main()
 }
 ```
 
-### 2.3 std::unordered_map
+### std::unordered_map
 
 std::unordered_map与std::map用法基本差不多，但STL在内部实现上有很大不同，std::map使用的数据结构为二叉树，而std::unordered_map内部是哈希表的实现方式，哈希map理论上查找效率为O(1)。但在存储效率上，哈希map需要增加哈希表的内存开销。
 
@@ -192,7 +192,7 @@ int main()
 }
 ```
 
-### 2.4 std::unordered_set
+### std::unordered_set
 
 std::unordered_set的数据存储结构也是哈希表的方式结构，除此之外，std::unordered_set在插入时不会自动排序，这都是std::set表现不同的地方。
 
@@ -230,11 +230,11 @@ int main()
 }
 ```
 
-## 3、多线程
+## 多线程
 
 在C++11以前，C++的多线程编程均需依赖系统或第三方接口实现，一定程度上影响了代码的移植性。C++11中，引入了boost库中的多线程部分内容，形成C++标准，形成标准后的boost多线程编程部分接口基本没有变化，这样方便了以前使用boost接口开发的使用者切换使用C++标准接口，把容易把boost接口升级为C++接口。
 
-### 3.1 std::thread
+### std::thread
 
 std::thread为C++11的线程类，使用方法和boost接口一样，非常方便，同时，C++11的std::thread解决了boost::thread中构成参数限制的问题，我想着都是得益于C++11的可变参数的设计风格。
 
@@ -269,7 +269,7 @@ int main()
 
 t1.join()会等待t1线程退出后才继续往下执行，t2.detach()并不会并不会把，detach字符输出后，主函数退出，threadfun2还未执行完成，但是在主线程退出后，t2的线程也被已经被强退出。
 
-### 3.2 std::atomic
+### std::atomic
 
 std::atomic为C++11分装的原子数据类型。
 
@@ -313,7 +313,7 @@ int main()
 }
 ```
 
-### 3.3 std::condition_variable
+### std::condition_variable
 
 C++11中的std::condition_variable就像Linux下使用pthread_cond_wait和pthread_cond_signal一样，可以让线程休眠，直到别唤醒，现在在从新执行。线程等待在多线程编程中使用非常频繁，经常需要等待一些异步执行的条件的返回结果。
 
@@ -359,7 +359,7 @@ return 0;
 
 上面的代码，在14行中调用cv.wait(lck)的时候，线程将进入休眠，在调用33行的go函数之前，10个线程都处于休眠状态，当22行的cv.notify_all()运行后，14行的休眠将结束，继续往下运行，最终输出如上结果。
 
-## 4、智能指针内存管理
+## 智能指针内存管理
 
 在内存管理方面，C++11的std::auto_ptr基础上，移植了boost库中的智能指针的部分实现，如std::shared_ptr、std::weak_ptr等，当然，像boost::thread一样，C++11也修复了boost::make_shared中构造参数的限制问题。
 
@@ -367,7 +367,7 @@ return 0;
 
 简单地说，智能指针只是用对象去管理一个资源指针，同时用一个计数器计算当前指针引用对象的个数，当管理指针的对象增加或减少时，计数器也相应加1或减1，当最后一个指针管理对象销毁时，计数器为1，此时在销毁指针管理对象的同时，也把指针管理对象所管理的指针进行delete操作。
 
-### 4.1、std::shared_ptr
+### std::shared_ptr
 
 std::shared_ptr包装了new操作符动态分配的内存，可以自由拷贝复制，基本上是使用最多的一个智能指针类型。
 
@@ -413,7 +413,7 @@ Test()
 1. std::make_shared封装了new方法，boost::make_shared之前的原则是既然释放资源delete由智能指针负责，那么应该把new封装起来，否则会让人觉得自己调用了new，但没有调用delete，似乎与谁申请，谁释放的原则不符。C++也沿用了这一做法。
 2. 随着引用对象的增加std::shared_ptr<Test> p2 = p1，指针的引用计数有1变为2，当p2退出作用域后，p1的引用计数变回1，当main函数退出后，p1离开main函数的作用域，此时p1被销毁，当p1销毁时，检测到引用计数已经为1，就会在p1的析构函数中调用delete之前std::make_shared创建的指针。
 
-### 4.2 std::weak_ptr
+### std::weak_ptr
 
 std::weak_ptr网上很多人说其实是为了解决std::shared_ptr在相互引用的情况下出现的问题而存在的，C++官网对这个只能指针的解释也不多，那就先甭管那么多了，让我们暂时完全接受这个观点。
 
@@ -583,9 +583,9 @@ TestB()
 1. 所有的对象最后都能正常释放，不会存在上一个例子中的内存没有释放的问题。
 2. ptr_a和ptr_b在main函数中退出前，引用计数均为1，也就是说，在TestA和TestB中对std::weak_ptr的相互引用，不会导致计数的增加。在TestB析构函数中，调用std::shared_ptr<TestA> tmp = m_TestA_Ptr.lock()，把std::weak_ptr类型转换成std::shared_ptr类型，然后对TestA对象进行调用。
 
-## 5、其他
+## 其他
 
-### 5.1、std::function、std::bind封装可执行对象
+### std::function、std::bind封装可执行对象
 
 std::bind和std::function也是从boost中移植进来的C++新标准，这两个语法使得封装可执行对象变得简单而易用。此外，std::bind和std::function也可以结合我们一下所说的lamda表达式一起使用，使得可执行对象的写法更加“花俏”。
 
@@ -752,7 +752,7 @@ sum:3
 
 
 
-### 5.2 lamda表达式
+### lamda表达式
 
 在众多的C++11新特性中，个人觉得lamda表达式不仅仅是一个语法新特性，对于没有用过java或C#lamda表达式读者，C++11的lamda表达式在一定程度上还冲击着你对传统C++编程的思维和想法。
 
