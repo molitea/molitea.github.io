@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"molitea.github.io","root":"/","images":"/images","scheme":"Gemini","version":"8.1.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}};
+  </script>
+<meta name="description" content="什么是线程池">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 线程池">
+<meta property="og:url" content="https://molitea.github.io/2021/02/24/python_thread_pool/index.html">
+<meta property="og:site_name" content="MOLI-TEA">
+<meta property="og:description" content="什么是线程池">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-24T07:48:23.512Z">
+<meta property="article:modified_time" content="2021-02-24T07:48:23.512Z">
+<meta property="article:author" content="MOLI TEA">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="threadpool">
+<meta property="article:tag" content="futures">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://molitea.github.io/2021/02/24/python_thread_pool/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>Python 线程池 | MOLI-TEA</title>
+  
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">MOLI-TEA</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">MOLI TEA</p>
+  <div class="site-description" itemprop="description">札记</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+        </section>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://molitea.github.io/2021/02/24/python_thread_pool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="MOLI TEA">
+      <meta itemprop="description" content="札记">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="MOLI-TEA">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python 线程池
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-24 07:48:23" itemprop="dateCreated datePublished" datetime="2021-02-24T07:48:23+00:00">2021-02-24</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><strong>什么是线程池</strong></p>
+<p>Web服务器、数据库服务器、文件服务器、邮件服务器等许多服务器应用都面向处理来自某些远程来源的<strong>大量短小的任务</strong>。构建服务器应用程序的一个过于简单的模型是：每当一个请求到达就创建一个新的服务对象，然后在新的服务对象中为请求服务。但当有大量请求并发访问时，服务器不断的创建和销毁对象的开销很大。所以提高服务器效率的一个手段就是尽可能减少创建和销毁对象的次数，特别是一些很耗资源的对象创建和销毁，这样就引入了“池”的概念，“池”的概念使得人们可以定制一定量的资源，然后对这些资源进行复用，而不是频繁的创建和销毁。</p>
+<p>线程池是预先创建线程的一种技术。线程池在还没有任务到来之前，创建一定数量的线程，放入空闲队列中。这些线程都是处于睡眠状态，即均为启动，不消耗CPU，而只是占用较小的内存空间。当请求到来之后，缓冲池给这次请求分配一个空闲线程，把请求传入此线程中运行，进行处理。当预先创建的线程都处于运行状态，即预制线程不够，线程池可以自由创建一定数量的新线程，用于处理更多的请求。当系统比较闲的时候，也可以通过移除一部分一直处于停用状态的线程。</p>
+<p><strong>线程池的注意事项</strong></p>
+<p>虽然线程池是构建多线程应用程序的强大机制，但使用它并不是没有风险的。在使用线程池时需注意线程池大小与性能的关系，注意并发风险、死锁、资源不足和线程泄漏等问题。</p>
+<p><strong>1）线程池大小</strong></p>
+<p>多线程应用并非线程越多越好，需要根据系统运行的软硬件环境以及应用本身的特点决定线程池的大小。一般来说，如果代码结构合理的话，线程数目与CPU 数量相适合即可。如果线程运行时可能出现阻塞现象，可相应增加池的大小；如有必要可采用自适应算法来动态调整线程池的大小，以提高CPU 的有效利用率和系统的整体性能。</p>
+<p><strong>2）并发错误</strong></p>
+<p>多线程应用要特别注意并发错误，要从逻辑上保证程序的正确性，注意避免死锁现象的发生。</p>
+<p><strong>3）线程泄漏</strong></p>
+<p>这是线程池应用中一个严重的问题，当任务执行完毕而线程没能返回池中就会发生线程泄漏现象。</p>
+<p><strong>线程池的设计</strong></p>
+<p>一个典型的线程池，应该包括如下几个部分：</p>
+<p>1、线程池管理器（ThreadPool），用于启动、停用，管理线程池</p>
+<p>2、工作线程（WorkThread），线程池中的线程</p>
+<p>3、请求接口（WorkRequest），创建请求对象，以供工作线程调度任务的执行</p>
+<p>4、请求队列（RequestQueue），用于存放和提取请求</p>
+<p>5、结果队列（ResultQueue），用于存储请求执行后返回的结果</p>
+<p>线程池管理器，通过添加请求的方法（putRequest）向请求队列（RequestQueue）添加请求，这些请求事先需要实现请求接口，即传递工作函数、参数、结果处理函数、以及异常处理函数。</p>
+<p>接着，初始化一定数量的工作线程，这些线程通过轮询的方式不断查看请求队列（RequestQueue），只要有请求存在，则会提取出请求，进行执行。</p>
+<p>然后，线程池管理器调用方法（poll）查看结果队列（resultQueue）是否有值，如果有值，则取出，调用结果处理函数执行。</p>
+<p>通过以上讲述，不难发现，这个系统的核心资源在于请求队列和结果队列，工作线程通过轮询requestQueue获得任务，主线程通过查看结果队列，获得执行结果。</p>
+<p><strong>如何实现线程池</strong>？</p>
+<p>这里，我分别介绍两种实现方式：</p>
+<p><strong>第一种：threadpool（老配方）</strong></p>
+<p>使用threadpool模块，这是个python的第三方模块，支持python2和python3，具体使用方式如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> threadpool <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> datetime</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自己在ThreadPool类中添加的方法</span></span><br><span class="line"><span class="comment"># def workersize(self):</span></span><br><span class="line"><span class="comment">#         return len(self.workers)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># def stop(self):</span></span><br><span class="line"><span class="comment">#     &#x27;&#x27;&#x27;join 所有的thread,确保所有的线程都执行完毕&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="comment">#     self.dismissWorkers(self.workersize(), True)</span></span><br><span class="line"><span class="comment">#     self.joinAllDismissedWorkers()</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">do_work</span>(<span class="params">data</span>):</span></span><br><span class="line">    time.sleep(random.randint(<span class="number">1</span>,<span class="number">3</span>))</span><br><span class="line">    res = <span class="built_in">str</span>(datetime.datetime.now()) + <span class="string">&quot;&quot;</span> + <span class="built_in">str</span>(data)</span><br><span class="line">    <span class="keyword">return</span> res</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">print_result</span>(<span class="params">request, result</span>):</span></span><br><span class="line">    <span class="built_in">print</span> <span class="string">&quot;---Result from request %s : %r&quot;</span> % (request.requestID, result)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    main = ThreadPool(<span class="number">3</span>)</span><br><span class="line">     </span><br><span class="line">    reqs = makeRequests(do_work, [i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">20</span>)], print_result)</span><br><span class="line">    <span class="keyword">for</span> i, req <span class="keyword">in</span> <span class="built_in">enumerate</span>(reqs):</span><br><span class="line">        main.putRequest(req)</span><br><span class="line">        <span class="built_in">print</span> <span class="string">&quot;(%d): work request #%s added.&quot;</span> % (i, req.requestID)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># for i in range(20):</span></span><br><span class="line">    <span class="comment">#     req = WorkRequest(do_work, args=[i], callback=print_result)</span></span><br><span class="line">    <span class="comment">#     # req = WorkRequest(do_work, args=(i,), callback=print_result)        # ok too</span></span><br><span class="line">    <span class="comment">#     main.putRequest(req)</span></span><br><span class="line">    <span class="comment">#     print &quot;(%d): work request #%s added.&quot; % (i, req.requestID)</span></span><br><span class="line">     </span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;-&#x27;</span> * <span class="number">20</span>, main.workersize(), <span class="string">&#x27;-&#x27;</span> * <span class="number">20</span></span><br><span class="line">     </span><br><span class="line">    counter = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            time.sleep(<span class="number">0.5</span>)</span><br><span class="line">            main.poll()</span><br><span class="line">            <span class="keyword">if</span>(counter == <span class="number">5</span>):</span><br><span class="line">                <span class="built_in">print</span> <span class="string">&quot;Add 3 more workers threads&quot;</span></span><br><span class="line">                main.createWorkers(<span class="number">3</span>)</span><br><span class="line">                <span class="built_in">print</span> <span class="string">&#x27;-&#x27;</span> * <span class="number">20</span>, main.workersize(), <span class="string">&#x27;-&#x27;</span> * <span class="number">20</span></span><br><span class="line">            <span class="keyword">if</span>(counter == <span class="number">10</span>):</span><br><span class="line">                <span class="built_in">print</span> <span class="string">&quot;dismiss 2 workers threads&quot;</span></span><br><span class="line">                main.dismissWorkers(<span class="number">2</span>)</span><br><span class="line">                <span class="built_in">print</span> <span class="string">&#x27;-&#x27;</span> * <span class="number">20</span>, main.workersize(), <span class="string">&#x27;-&#x27;</span> * <span class="number">20</span></span><br><span class="line">            counter += <span class="number">1</span></span><br><span class="line">        <span class="keyword">except</span> NoResultsPending:</span><br><span class="line">            <span class="built_in">print</span> <span class="string">&quot;no pending results&quot;</span></span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">     </span><br><span class="line">    main.stop()</span><br><span class="line">    <span class="built_in">print</span> <span class="string">&quot;Stop &amp; End.&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>threadpool是一个比较老的模块了，现在虽然还有一些人在用，但已经不再是主流了，关于python多线程，现在已经开始步入未来（futures模块）了。</p>
+<p><strong>第二种：futures（新配方）</strong></p>
+<p>使用concurrent.futures模块，这个模块是python3中自带的模块，在python2.7以上的版本需要安装（pip install futures）才能使用。具体使用如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span>  concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task</span>(<span class="params">name, seconds</span>):</span></span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;%s sleep %s seconds start...&#x27;</span> % (name, seconds)</span><br><span class="line">    time.sleep(seconds)</span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;%s sleep %s seconds done&#x27;</span> % (name, seconds)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;%s task done&#x27;</span> % name</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> ThreadPoolExecutor(max_workers=<span class="number">5</span>) <span class="keyword">as</span> t:</span><br><span class="line">    task1 = t.submit(task, <span class="string">&#x27;xxxx&#x27;</span>, <span class="number">1</span>)</span><br><span class="line">    task2 = t.submit(task, <span class="string">&#x27;zzzz&#x27;</span>, <span class="number">2</span>)</span><br><span class="line">    task3 = t.submit(task, <span class="string">&#x27;yyyy&#x27;</span>, <span class="number">2</span>)</span><br><span class="line">    task4 = t.submit(task, <span class="string">&#x27;mmmm&#x27;</span>, <span class="number">3</span>)</span><br><span class="line">    print(task1.done())</span><br><span class="line">    print(task2.done())</span><br><span class="line">    print(task3.done())</span><br><span class="line">    print(task4.done())</span><br><span class="line">    time.sleep(<span class="number">2</span>)</span><br><span class="line">    print(task1.done())</span><br><span class="line">    print(task2.done())</span><br><span class="line">    print(task3.done())</span><br><span class="line">    print(task4.done())</span><br><span class="line"></span><br><span class="line">    print(task1.result())</span><br><span class="line">    print(task2.result())</span><br><span class="line">    print(task3.result())</span><br><span class="line">    print(task4.result())</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用 with 语句 ，通过 ThreadPoolExecutor 构造实例，同时传入 max_workers 参数来设置线程池中最多能同时运行的线程数目。</li>
+<li>使用 submit 函数来提交线程需要执行的任务到线程池中，并返回该任务的句柄（类似于文件、画图），注意 submit() 不是阻塞的，而是立即返回。</li>
+<li>通过使用 done() 方法判断该任务是否结束。上面的例子可以看出，提交任务后立即判断任务状态，显示四个任务都未完成。在延时2.5后，task1 和 task2 执行完毕，task3 仍在执行中。</li>
+<li>使用 result() 方法可以获取任务的返回值 <strong>【注意result 是阻塞的会阻塞主线程】</strong></li>
+</ul>
+<p>concurrent.futures中的常用方法：</p>
+<p><strong>wait</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wait(fs, timeout=<span class="literal">None</span>, return_when=ALL_COMPLETED)</span><br></pre></td></tr></table></figure>
+
+<p>fs: 表示需要执行的序列；<br>timeout: 等待的最大时间，如果超过这个时间即使线程未执行完成也将返回；<br>return_when：表示wait返回结果的条件，默认为 ALL_COMPLETED 全部执行完成再返回；可指定FIRST_COMPLETED 当第一个执行完就退出阻塞。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span>  concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor,wait,FIRST_COMPLETED, ALL_COMPLETED</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">task_args_list = [(<span class="string">&#x27;zhangsan&#x27;</span>, <span class="number">1</span>),(<span class="string">&#x27;lishi&#x27;</span>,<span class="number">2</span>), (<span class="string">&#x27;wangwu&#x27;</span>, <span class="number">3</span>)]</span><br><span class="line">task_list = []</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task</span>(<span class="params">name, seconds</span>):</span></span><br><span class="line">    print(<span class="string">&#x27;% sleep %s seconds start...&#x27;</span> % (name, seconds))</span><br><span class="line">    time.sleep(seconds)</span><br><span class="line">    print(<span class="string">&#x27;% sleep %s seconds done&#x27;</span> % (name, seconds))</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;%s task done&#x27;</span> % name</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> ThreadPoolExecutor(max_workers=<span class="number">5</span>) <span class="keyword">as</span> t:</span><br><span class="line">    [task_list.append(t.submit(task, *arg)) <span class="keyword">for</span>  arg <span class="keyword">in</span> task_args_list]</span><br><span class="line">    wait(task_list, return_when=FIRST_COMPLETED)</span><br><span class="line">    print(<span class="string">&#x27;all_task_submit_complete! and First task complete!&#x27;</span>)</span><br><span class="line">    print(wait(task_list,timeout=<span class="number">1.5</span>))</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 运行结果</span></span><br><span class="line">zhangsanleep <span class="number">1</span> seconds start...</span><br><span class="line">lishileep <span class="number">2</span> seconds start...</span><br><span class="line">wangwuleep <span class="number">3</span> seconds start...</span><br><span class="line">zhangsanleep <span class="number">1</span> seconds done</span><br><span class="line">all_task_submit_complete! <span class="keyword">and</span> First task complete!</span><br><span class="line">lishileep <span class="number">2</span> seconds done</span><br><span class="line">DoneAndNotDoneFutures(done=<span class="built_in">set</span>([&lt;Future at <span class="number">0x33b8708</span> state=finished returned <span class="built_in">str</span>&gt;, &lt;Future at <span class="number">0x33b8d08</span> state=finished returned <span class="built_in">str</span>&gt;]), not_done=<span class="built_in">set</span>([&lt;Future at <span class="number">0x33be288</span> state=running&gt;]))</span><br><span class="line">wangwuleep <span class="number">3</span> seconds done</span><br></pre></td></tr></table></figure>
+
+<p><strong>as_completed</strong></p>
+<p>上面虽提供了done()方法判断任务是否结束的方法，但是不能在主线程中一直判断。最好的方法是当某个任务结束了，就给主线程返回结果，而不是一直判断每个任务是否结束。</p>
+<p>concurrent.futures 中 的 as_completed() 就是这样一个方法，当子线程中的任务执行完后，直接用 result() 获取返回结果。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span>  concurrent.futures <span class="keyword">import</span> ThreadPoolExecutor, as_completed</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line">task_args_list = [(<span class="string">&#x27;zhangsan&#x27;</span>, <span class="number">1</span>),(<span class="string">&#x27;lishi&#x27;</span>,<span class="number">3</span>), (<span class="string">&#x27;wangwu&#x27;</span>, <span class="number">2</span>)]</span><br><span class="line">task_list = []</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task</span>(<span class="params">name, seconds</span>):</span></span><br><span class="line">    print(<span class="string">&#x27;%s sleep %s seconds start...&#x27;</span> % (name, seconds))</span><br><span class="line">    time.sleep(seconds)</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&#x27;%s sleep %s seconds done&#x27;</span> % (name, seconds)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> ThreadPoolExecutor(max_workers=<span class="number">5</span>) <span class="keyword">as</span> t:</span><br><span class="line">    [task_list.append(t.submit(task, *arg)) <span class="keyword">for</span> arg <span class="keyword">in</span> task_args_list]</span><br><span class="line">    <span class="keyword">for</span> future <span class="keyword">in</span> as_completed(task_list):</span><br><span class="line">        print(future.result())</span><br><span class="line"></span><br><span class="line">    print(<span class="string">&#x27;All Task Done!!!!!!!!!&#x27;</span>)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 运行结果</span></span><br><span class="line">zhangsan sleep <span class="number">1</span> seconds start...</span><br><span class="line">lishi sleep <span class="number">3</span> seconds start...</span><br><span class="line">wangwu sleep <span class="number">2</span> seconds start...</span><br><span class="line">zhangsan sleep <span class="number">1</span> seconds done</span><br><span class="line">wangwu sleep <span class="number">2</span> seconds done</span><br><span class="line">lishi sleep <span class="number">3</span> seconds done</span><br><span class="line">All Task Done!!!!!!!!!</span><br></pre></td></tr></table></figure>
+
+<p><strong>map</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">map</span>(fn, *iterables, timeout=<span class="literal">None</span>)</span><br></pre></td></tr></table></figure>
+
+<p>fn： 第一个参数 fn 是需要线程执行的函数；<br>iterables：第二个参数接受一个可迭代对象；<br>timeout： 第三个参数 timeout 跟 wait() 的 timeout 一样，但由于 map 是返回线程执行的结果，如果 timeout小于线程执行时间会抛异常 TimeoutError。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">spider</span>(<span class="params">page</span>):</span></span><br><span class="line">    time.sleep(page)</span><br><span class="line">    <span class="keyword">return</span> page</span><br><span class="line"></span><br><span class="line">start = time.time()</span><br><span class="line">executor = ThreadPoolExecutor(max_workers=<span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">i = <span class="number">1</span></span><br><span class="line"><span class="keyword">for</span> result <span class="keyword">in</span> executor.<span class="built_in">map</span>(spider, [<span class="number">2</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">4</span>]):</span><br><span class="line">    print(<span class="string">&quot;task&#123;&#125;:&#123;&#125;&quot;</span>.<span class="built_in">format</span>(i, result))</span><br><span class="line">    i += <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#  运行结果</span></span><br><span class="line">task1:<span class="number">2</span></span><br><span class="line">task2:<span class="number">3</span></span><br><span class="line">task3:<span class="number">1</span></span><br><span class="line">task4:<span class="number">4</span></span><br></pre></td></tr></table></figure>
+
+<p>使用 map 方法，无需提前使用 submit 方法，map 方法与 python 高阶函数 map 的含义相同，都是将序列中的每个元素都执行同一个函数。上面的代码对列表中的每个元素都执行 spider() 函数，并分配各线程池。</p>
+<p>可以看到map执行结果与上面的 as_completed() 方法的结果不同，输出顺序和列表的顺序相同，就算 1s 的任务先执行完成，也会先打印前面提交的任务返回的结果。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"># python</a>
+              <a href="/tags/threadpool/" rel="tag"># threadpool</a>
+              <a href="/tags/futures/" rel="tag"># futures</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/02/24/qemu-emulation-iot-device/" rel="prev" title="路由器固件模拟">
+                  <i class="fa fa-chevron-left"></i> 路由器固件模拟
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/24/misc/" rel="next" title="札记or备忘录">
+                  札记or备忘录 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MOLI TEA</span>
+</div>
+<div class="busuanzi-count">
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+
+</body>
+</html>
