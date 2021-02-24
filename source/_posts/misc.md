@@ -28,3 +28,25 @@ Moloch——Moloch是一个开源，大规模，完整的数据包捕获，索�
 ivre、reNgine
 
 FinalRecon、Sandmap
+
+## [取证工具](http://www.yidianzixun.com/article/0JGUTuyf)
+
+### 内存取证
+
+Windows：dumpit\RAMCapturer\Magnet RAM Capture\WinEn\Winpmem\EnCase Imager\FTK Imager\取证大师\取证神探
+
+Linux：
+
+dd（适合Linux早期版本）
+
+[LiME](https://github.com/504ensicslabs/lime)\linpmem\Draugr\\[Volatilitux](https://code.google.com/archive/p/volatilitux/)\\[Memfetch](https://lcamtuf.coredump.cx/)\\[Memdump](http://manpages.ubuntu.com/manpages/bionic/en/man1/memdump.1.html)
+
+[《Linux Memory Analysis》](https://www.jamesbower.com/linux-memory-analysis/)
+
+**[AVML](https://github.com/microsoft/avml)**——[《**Intro to Linux memory forensics**》](https://stuxnet999.github.io/dfir/2020/09/20/Linux-Memory-Forensics.html)
+
+linux内存镜像分析的时候需要Profile，所以也许取单个进程的内存是一个好的选择。（使用gdb dump地址空间数据）
+
+### 内存分析
+
+[Comparative Analysis of Free Tools for Physical Memory Dumps Parsing](https://soshace.com/comparative-analysis-of-free-tools-for-physical-memory-dumps-parsing/)
